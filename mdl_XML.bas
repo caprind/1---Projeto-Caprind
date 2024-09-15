@@ -1,4 +1,45 @@
 Attribute VB_Name = "mdl_XML"
+'==============================================================
+' Uma CFOP pode ser:
+'==============================================================
+' Define se é nota propria ou de terceiro
+'==============================================================
+' Propria
+' Terceiro
+'==============================================================
+' Define se é nota de entrada ou saida
+'==============================================================
+' Entrada
+' Saida
+'=============================================================
+' Define o tipo da CFOP
+'=============================================================
+' Industrializaçãopor encomenda
+'=============================================================
+' MaoObra
+' Tipo_Operacao = "2"
+'=============================================================
+' Operação de remessa de demonstração
+'=============================================================
+' Demonstracao
+' Tipo_Operacao = "3"
+'=============================================================
+' Operação de devolução
+'=============================================================
+' Devolucao
+' Tipo_Operacao = "4"
+'=============================================================
+' Operação de remessa para industrialização
+'=============================================================
+' Remessa
+' Tipo_Operacao = "5"
+'=============================================================
+' Operação de retorno de conserto ou industrialização
+'=============================================================
+' retorno
+' Tipo_Operacao = "6"
+'=============================================================
+
 '====================================================
 ' Variaveis de importação XML
 '====================================================
@@ -90,8 +131,7 @@ Public DestxMun
 Public DestUF
 Public DestcPais
 Public DestxPais
-
-
+Public dest_UF As String
 Public DestindIEDest
 
 'autorizado receber XML
@@ -236,7 +276,9 @@ Public FATURAtPag
 Public FATURAvPag
 
 'informações Adicionais
-Public ADICIONAISinfCpl
+Public infCpl As String
+Public infAdFisco As String
+
 
 Public Function ProcImportarXMLCarregacampo(V1 As String, V2 As String, V3 As Integer)
 On Error GoTo tratar_erro
@@ -283,21 +325,24 @@ If strCaminho = "" Then
 PosicaoBase = 0
     frmfaturamento_Nova_Nota.lblXML.Caption = "Importação de arquivo XML sendo executado, aguarde..."
     frmfaturamento_Nova_Nota.Refresh
+        
+    strarquivo = DS.LoadStringFromFile(strCaminho, EncUTF8)
+    Debug.Print Teste
     
-    n = FreeFile()
-    Open strCaminho For Input As #n
-    strarquivo = Input(LOF(n), n)
-    strarquivo = Replace(strarquivo, "ï»¿", "")
-    Close #n
+'    n = FreeFile()
+'    Open strCaminho For Input As #n
+'    strarquivo = Input(LOF(n), n)
+'    strarquivo = Replace(strarquivo, "ï»¿", "")
+'    Close #n
     
-    infnfe = ProcImportarXMLCarregacampo("<infNFe", "/infNFe>", Len("<infNFe"))
+    infNFe = ProcImportarXMLCarregacampo("<infNFe", "/infNFe>", Len("<infNFe"))
     
-    If Left$(infnfe, 4) = " Id=" Then
-        infnfe = Left$(infnfe, 52)
-        infnfe = Right$(infnfe, 44)
+    If Left$(infNFe, 4) = " Id=" Then
+        infNFe = Left$(infNFe, 52)
+        infNFe = Right$(infNFe, 44)
     Else
-        infnfe = Left$(infnfe, 66)
-        infnfe = Right$(infnfe, 44)
+        infNFe = Left$(infNFe, 66)
+        infNFe = Right$(infNFe, 44)
     End If
 '========================================================
 ' Chave de acesso
@@ -305,11 +350,11 @@ PosicaoBase = 0
 Debug.Print TPNota
 PosicaoBase = 0
 
-    If TPNota = "T" Then
-        chNF = infnfe
-    Else
-        chNF = ""
-    End If
+ '   If TPNota = "T" Then
+  '  chNF = infNFe
+  '  Else
+  '      chNF = ""
+  '  End If
     
 'Dados da nota fiscal
     V1 = "ide"
@@ -393,8 +438,14 @@ PosicaoBase = 0
 '    CNPJ  = LerDadosXML(strarquivo, "emit", "CNPJ")
     CNPJ = ProcImportarXMLCarregacampo("<CNPJ>", "</CNPJ>", Len("<CNPJ>"))
     CNPJ = Format(CNPJ, "@@.@@@.@@@/@@@@-@@")
+    EMITCNPJ = CNPJ
     xNome = UCase(ProcImportarXMLCarregacampo("<xNome>", "</xNome>", Len("<xNome>")))
     xFant = UCase(ProcImportarXMLCarregacampo("<xFant>", "</xFant>", Len("<xFant>")))
+    
+    PosicaoBase = 0
+    PosicaoInicial = 0
+    PosicaoFinal = 0
+    lngPosicaoFinal = 0
     
     'Endereço emitente
     xLgr = UCase(ProcImportarXMLCarregacampo("<xLgr>", "</xLgr>", Len("<xLgr>")))
@@ -409,11 +460,18 @@ PosicaoBase = 0
     'Var1 = "fone"
     'fone = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
     
+    PosicaoBase = 0
+    PosicaoInicial = 0
+    PosicaoFinal = 0
+    lngPosicaoFinal = 0
+       
         
     Var1 = "IE"
     Var_IE = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
 
 '    Var_IE = UCase(ProcImportarXMLCarregacampo("<IE>", "</IE>", Len("<IE>")))
+
+
     
     Var1 = "CRT"
     CRT = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
@@ -421,10 +479,10 @@ PosicaoBase = 0
  '   CRT = UCase(ProcImportarXMLCarregacampo("<CRT>", "</CRT>", Len("<CRT>")))
 
     'Dados do Destinatário
- PosicaoBase = 0
- PosicaoInicial = 0
- PosicaoFinal = 0
- lngPosicaoFinal = 0
+    PosicaoBase = 0
+    PosicaoInicial = 0
+    PosicaoFinal = 0
+    lngPosicaoFinal = 0
  
     V1 = "<dest>"
     PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
@@ -474,10 +532,16 @@ PosicaoBase = 0
       Case "2": dest_indIEDest = "2 - Contribuinte isento de Inscrição no cadastro de Contribuintes"
       Case "9": dest_indIEDest = "9 - Não Contribuinte, que pode ou não possuir Inscrição Estadual no Cadastro de Contribuintes do ICMS."
     End Select
+    
+     If dest_UF <> "EX" Then
+    chNF = infNFe
+    Else
+     chNF = ""
+  End If
 '=========================================================================
 '  Gravação dos dados na NFe
 '=========================================================================
-'If frmFaturamento_Prod_Serv.opt_Saida = True Then
+'If frmFaturamento_Prod_Serv.opt_Saida = True Or UF = "EX" Then
 'TPNota = "P"
 'Else
 'TPNota = "T"
@@ -488,17 +552,19 @@ PosicaoBase = 0
     Aplicacao = "P"
     TipoNF = "M1"
     
-    Set TBAbrir = CreateObject("adodb.recordset")
-    StrSql = "Select CAST(int_NotaFiscal AS int) AS NF, Serie FROM tbl_Dados_Nota_Fiscal where Serie = '1'and Modelo = '55' and tipoNF = 'M1' and Aplicacao = 'P' and ID_empresa = '" & IDempresa & "' and int_NotaFiscal IS NOT NULL order by dt_DataEmissao desc, NF desc"
-    TBAbrir.Open StrSql, Conexao, adOpenKeyset, adLockOptimistic
-
-'    TBAbrir.Open "Select CAST(int_NotaFiscal AS int) AS NF, Serie FROM tbl_Dados_Nota_Fiscal where tipoNF = '" & TipoNF & "' and Aplicacao = 'P' and ID_empresa = '" & ID_empresa & "' and int_NotaFiscal IS NOT NULL order by  NF desc,dt_DataEmissao desc", Conexao, adOpenKeyset, adLockOptimistic
-    If TBAbrir.EOF = False Then
-   ' TBAbrir.MoveLast
-        QuantsolicitadoN1 = TBAbrir!NF + 1
-        FamiliaAntiga = QuantsolicitadoN1
-        nNF = FunTamanhoTextoZeroEsq(FamiliaAntiga, 9)
-        Serie = IIf(IsNull(TBAbrir!Serie), 1, TBAbrir!Serie)
+    If dest_UF = "EX" Then
+        Set TBAbrir = CreateObject("adodb.recordset")
+        StrSql = "Select CAST(int_NotaFiscal AS int) AS NF, Serie FROM tbl_Dados_Nota_Fiscal where Serie = '1'and Modelo = '55' and tipoNF = 'M1' and Aplicacao = 'P' and ID_empresa = '" & IDempresa & "' and int_NotaFiscal IS NOT NULL order by dt_DataEmissao desc, NF desc"
+        TBAbrir.Open StrSql, Conexao, adOpenKeyset, adLockOptimistic
+    
+    '    TBAbrir.Open "Select CAST(int_NotaFiscal AS int) AS NF, Serie FROM tbl_Dados_Nota_Fiscal where tipoNF = '" & TipoNF & "' and Aplicacao = 'P' and ID_empresa = '" & ID_empresa & "' and int_NotaFiscal IS NOT NULL order by  NF desc,dt_DataEmissao desc", Conexao, adOpenKeyset, adLockOptimistic
+        If TBAbrir.EOF = False Then
+       ' TBAbrir.MoveLast
+            QuantsolicitadoN1 = TBAbrir!NF + 1
+            FamiliaAntiga = QuantsolicitadoN1
+            nNF = FunTamanhoTextoZeroEsq(FamiliaAntiga, 9)
+            Serie = IIf(IsNull(TBAbrir!Serie), 1, TBAbrir!Serie)
+        End If
     End If
     
    Else
@@ -568,7 +634,7 @@ End If
             Else
                 Bairro = IIf(IsNull(TBClientes!Bairro), "", TBClientes!Bairro)
             End If
-            TBGravar!Txt_bairro = Bairro
+            TBGravar!txt_Bairro = Bairro
             
             TBGravar!txt_tipocliente = "JP"
             TBGravar!txt_IE_Cliente = IIf(IsNull(TBClientes!RG_IE), "", TBClientes!RG_IE)
@@ -586,7 +652,8 @@ End If
      End If
      
 'Se for nota de cliente com produtos a serem industrializados
-    If tpNF = "1" And TPNota = "T" Then
+    If tpNF = "0" And TPNota = "T" Then
+          Set TBClientes = CreateObject("adodb.recordset")
         TBClientes.Open "Select * from Clientes where CPF_CNPJ = '" & CNPJ & "'", Conexao, adOpenKeyset, adLockOptimistic
         If TBClientes.EOF = False Then
            TBGravar!Id_Int_Cliente = TBClientes!IDCliente
@@ -596,7 +663,7 @@ End If
         End If
             TBGravar!txt_Razao_Nome = IIf(NomeRazao <> "", NomeRazao, xNome)
             TBGravar!txt_Endereco = IIf(xLgr <> "", xLgr, "Sem endereço")
-            TBGravar!Txt_bairro = xBairro
+            TBGravar!txt_Bairro = xBairro
             TBGravar!txt_tipocliente = IIf(Len(CNPJ) <> 14, "JP", "FP")
             TBGravar!txt_UF = UF
             TBGravar!txt_CNPJ_CPF = CNPJ
@@ -606,7 +673,32 @@ End If
             TBGravar!Int_status = "1"
             TBGravar!Numero = nro
      End If
-     
+    
+ 'Se for nota própria
+    If tpNF = "1" And TPNota = "P" Then
+    
+        Set TBClientes = CreateObject("adodb.recordset")
+        TBClientes.Open "Select * from Clientes where CPF_CNPJ = '" & dest_CNPJ & "'", Conexao, adOpenKeyset, adLockOptimistic
+        If TBClientes.EOF = False Then
+           TBGravar!Id_Int_Cliente = TBClientes!IDCliente
+           NomeRazao = TBClientes!NomeRazao
+           IDCliente = TBClientes!IDCliente
+           TBClientes.Close
+        End If
+            TBGravar!txt_Razao_Nome = IIf(NomeRazao <> "", NomeRazao, dest_xNome)
+            TBGravar!txt_Endereco = IIf(dest_xLgr <> "", dest_xLgr, "Sem endereço")
+            TBGravar!txt_Bairro = dest_xBairro
+            TBGravar!txt_tipocliente = IIf(Len(dest_CNPJ) <> 14, "JP", "FP")
+            TBGravar!txt_UF = dest_UF
+            TBGravar!txt_CNPJ_CPF = dest_CNPJ
+            TBGravar!Txt_CEP = dest_CEP
+            TBGravar!txt_Municipio = dest_xMun
+            TBGravar!txt_Hora_Saida = Format(dhEmi, "hh:mm")
+            TBGravar!Int_status = "1"
+            TBGravar!Numero = nro
+            
+    End If
+    
 'Se for nota de fornecedor com produtos a comprados
     If tpNF = "0" And TPNota = "T" Then
         Set TBFornecedor = CreateObject("adodb.recordset")
@@ -619,7 +711,7 @@ End If
         End If
             TBGravar!txt_Razao_Nome = IIf(NomeRazao <> "", NomeRazao, xNome)
             TBGravar!txt_Endereco = IIf(xLgr <> "", xLgr, "Sem endereço")
-            TBGravar!Txt_bairro = xBairro
+            TBGravar!txt_Bairro = xBairro
             TBGravar!txt_tipocliente = IIf(Len(CNPJ) <> 14, "JP", "FP")
             TBGravar!txt_UF = UF
             TBGravar!txt_CNPJ_CPF = CNPJ
@@ -1168,7 +1260,7 @@ On Error GoTo tratar_erro
     TBTotaisnota!Total_PIS_prod = vPIS
     TBTotaisnota!Total_Cofins_prod = vCOFINS
     TBTotaisnota!dbl_Valor_Total_Nota = vNF
-    TBTotaisnota!Valor_total_II = vImpostoImportacao
+    TBTotaisnota!Valor_total_II = IIf(vImpostoImportacao = "", 0, vImpostoImportacao)
     TBTotaisnota.Update
     'End If
     TBTotaisnota.Close
@@ -1184,11 +1276,6 @@ End Sub
 Public Sub ProcImportarXMLCFOP()
 On Error GoTo tratar_erro
 
-'If CFOP = "5902" Or CFOP = "6902" Then
-'retorno = True
-'Else
-'retorno = False
-'End If
 If TPNota = "T" Then
 If Left(CFOP, 1) <> 1 And Left(CFOP, 1) <> 2 Then
 If Left(CFOP, 1) = 5 Then
@@ -1251,15 +1338,15 @@ On Error GoTo tratar_erro
     V1 = "prod"
     PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
     
-    
 Inicio:
     
     If PosicaoBase > 0 Then
     
-
+    
     
     Var1 = "cProd"
     cProd = UCase(ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">")))
+    cReferencia = cProd
     
     V1 = "/det"
     PosicaoLimite = InStr(IIf(PosicaoBase > 0, PosicaoBase, 1), strarquivo, V1, 1)
@@ -1284,8 +1371,11 @@ Inicio:
     vUnCom = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
     Var1 = "vProd"
     vProd = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+    If dest_UF = "EX" Then
     Var1 = "vOutro"
     vOutro = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    End If
     
     
 '    V1 = "vFrete"
@@ -1299,13 +1389,13 @@ PosicaoAntiga = PosicaoBase
 ' lngPosicaoFinal = 0
 1:
     
-If PosicaoBase > PosicaoAntiga + 30 Then
-PosicaoBase = PosicaoAntiga
-PosicaoAntiga = PosicaoBase
-GoTo 1
-End If
-
-PosicaoAntiga = PosicaoBase
+'If PosicaoBase > PosicaoAntiga + 30 Then
+'PosicaoBase = PosicaoAntiga
+'PosicaoAntiga = PosicaoBase
+'GoTo 1
+'End If
+'
+'PosicaoAntiga = PosicaoBase
 '   vDesc = "0.00"
 '    Var1 = "vDesc"
 '    vDesc = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
@@ -1320,8 +1410,11 @@ PosicaoAntiga = PosicaoBase
 GoTo 2
 End If
 
+If dest_UF = "EX" Then
     Var1 = "orig"
     orig = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+End If
+
 '3:
 'If PosicaoBase > posicaoantiga + 30 Then
 ' vDesc = "0.00"
@@ -1377,7 +1470,7 @@ PosicaoAntiga = PosicaoBase
      Case "20": ProcCST20
      Case "30": ProcCST30
      Case "40": ProcCST40
-     Case "51": ProcCST51
+'     Case "51": ProcCST51
      Case "50": ProcCST50
      'Case "60": ProcCST60
      Case "70": ProcCST70
@@ -1416,36 +1509,42 @@ PosicaoBase = PosicaoAntiga
 Else
 PosicaoAntiga = PosicaoBase
 End If
-
-Var1 = "vBC"
-vBCIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-
-If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
-PosicaoBase = PosicaoAntiga
-vBCIPI = 0
-End If
-
-Var1 = "pIPI"
-IPIpIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-
-If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
-PosicaoBase = PosicaoAntiga
-IPIpIPI = 0
-End If
-
-Var1 = "vIPI"
-IPIvIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-
-If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+'=============================================================
+' Aqui
+'=============================================================
+If CSTIPI <> "55" Then
+    Var1 = "vBC"
+    vBCIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+    If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
     PosicaoBase = PosicaoAntiga
-    lngPosicaoFinal = PosicaoAntiga
-    IPIvIPI = 0
+    vBCIPI = 0
+    End If
+    
+    Var1 = "pIPI"
+    IPIpIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+    If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+    PosicaoBase = PosicaoAntiga
+    IPIpIPI = 0
+    End If
+    
+    Var1 = "vIPI"
+    IPIvIPI = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+    If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        lngPosicaoFinal = PosicaoAntiga
+        IPIvIPI = 0
+    End If
 End If
 
 
 If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
 PosicaoBase = PosicaoAntiga
 End If
+
+If dest_UF = "EX" Then
     
 'Imposto de importacao
     V1 = "</IPI>"
@@ -1462,7 +1561,7 @@ End If
 
     Var1 = "vIOF"
     vIOF = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-
+End If
     
 '==============================================================
 ' CST PIS
@@ -1480,53 +1579,97 @@ If PosicaoBase = 0 Then
 PosicaoBase = PosicaoAntiga
 End If
 
-If PosicaoBase <> 0 Then
-Var1 = "vBC"
-vbcPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+'==================================================
+' Aqui
+'==================================================
+If CSTPIS <> "08" Then
+        
+        If PosicaoBase <> 0 Then
+        Var1 = "vBC"
+        vbcPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'vbcPIS = 0
+        End If
+        
+        
+        If PosicaoBase <> 0 Then
+        Var1 = "pPIS"
+        PISpPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'PISpPIS = 0
+        End If
+        
+        If PosicaoBase <> 0 Then
+        Var1 = "vPIS"
+        PISvPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'PISvPIS = 0
+        End If
 End If
 
-If PosicaoBase <> 0 Then
-Var1 = "pPIS"
-PISpPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-End If
-
-
-If PosicaoBase <> 0 Then
-Var1 = "vPIS"
-PISvPIS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-End If
 
 '===================================================================================================
 'CST Cofins
 '===================================================================================================
 
 V1 = "COFINS"
-PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
+'PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
 
 If PosicaoBase <> 0 Then
 Var1 = "CST"
 CSTCOFINS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
 End If
 
+
 If PosicaoBase = 0 Then
 PosicaoBase = PosicaoAntiga
 End If
-
-If PosicaoBase <> 0 Then
-Var1 = "vBC"
-vBCCofins = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+'===================================================================================================
+' Aqui
+'===================================================================================================
+If CSTCOFINS <> "08" Then
+        If PosicaoBase <> 0 Then
+        Var1 = "vBC"
+        vBCCofins = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'vBCCofins = 0
+        End If
+        
+        
+        If PosicaoBase <> 0 Then
+        Var1 = "pCOFINS"
+        COFINSpCofins = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'COFINSpCofins = 0
+        End If
+        
+        
+        If PosicaoBase <> 0 Then
+        Var1 = "vCOFINS"
+        COFINSvCOFINS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        End If
+        
+        If PosicaoBase = 0 Or PosicaoBase > PosicaoLimite Then
+        PosicaoBase = PosicaoAntiga
+        'COFINSvCOFINS = 0
+        End If
 End If
 
-If PosicaoBase <> 0 Then
-Var1 = "pCOFINS"
-COFINSpCofins = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-End If
-
-
-If PosicaoBase <> 0 Then
-Var1 = "vCOFINS"
-COFINSvCOFINS = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-End If
 ' Fim dos impostos
 '=====================================================================================================
    
@@ -1545,6 +1688,8 @@ End If
 ValorTotal = 0
 '==============================================================
 ' Grava lista de produtos
+'==============================================================
+' Busca cadastro do produto por código de referencia
 '==============================================================
 Codproduto = ""
     Set TBComponente = CreateObject("adodb.recordset")
@@ -1619,11 +1764,24 @@ Set TBItem = CreateObject("adodb.recordset")
             SubTipoItem = 3
          frmProduto_Novo.Show 1
         End If
+        
             strRef = cProd
             DescricaoProduto = xProd
             unProd = uCom
             nReferencia = cProd
             Manual = CodManual
+'===============================================================================================
+'Se for nota de cliente com produtos a serem industrializados
+'===============================================================================================
+        If tpNF = "0" And TPNota = "T" Then
+            TBClientes.Open "Select * from Clientes where CPF_CNPJ = '" & EMITCNPJ & "'", Conexao, adOpenKeyset, adLockOptimistic
+            If TBClientes.EOF = False Then
+               NomeRazao = TBClientes!NomeRazao
+               IDCliente = TBClientes!IDCliente
+               TBClientes.Close
+            End If
+         End If
+
             cProd = FunCriaNovoProdServ(Manual, "codmanual = " & IIf(CodManual = False, 0, 1) & " and subtipoitem = " & SubTipoItem, "", strRef, 0, DescricaoProduto, DescricaoProduto, Familia, 0, 0, 0, unProd, unProd, ID_NCM, True, False, False, False, SubTipoItem, "P", "", 0, 0, 0, "", IDCliente, NomeRazao, "")
             StrSql = "Update projproduto set ID_CFOP1 = " & ID_CFOP & ", Estoque = " & IIf(Estoque = False, 0, 1) & ", Insp_recebimento = " & IIf(Inspecao_recebimento = False, 0, 1) & ", ID_Tipo = " & ID_Tipo & " where Codproduto = " & Codproduto & ""
             Conexao.Execute StrSql
@@ -1639,13 +1797,18 @@ TBAbrir.AddNew
 TBAbrir!Tipo = "P"
 TBAbrir!int_Cod_Produto = cProd
 TBAbrir!Codproduto = IIf(Codproduto <> "", Codproduto, 0)
-TBAbrir!N_referencia = nReferencia
+TBAbrir!N_referencia = cReferencia
 TBAbrir!int_NotaFiscal = nNF
 TBAbrir!ID_nota = ID_nota
 TBAbrir!int_Qtd = Replace(qCom, ".", ",")
 TBAbrir!Saldo = Replace(qCom, ".", ",")
-TBAbrir!Txt_descricao = IIf(cDesc <> "", cDesc, xProd)
+TBAbrir!Txt_descricao = xProd 'IIf(cDesc <> "", cDesc, xProd)
+
+If vOutro <> "" Then
 TBAbrir!Valor_acessorias = Replace(vOutro, ".", ",")
+End If
+
+If dest_UF = "EX" Then
 '============================================================================================================
 'Carrega dados da DI
 '============================================================================================================
@@ -1683,18 +1846,20 @@ End If
 '============================================================================================================
 'Carrega dados das adicoes da DI
 '============================================================================================================
-    V1 = "adi"
-    PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
-'Debug.print PosicaoBase
-If PosicaoBase > 0 Then
-    Var1 = "nAdicao"
-    nAdicao = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-    
-    Var1 = "nSeqAdic"
-    nSeqAdic = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-    
-    Var1 = "cFabricante"
-    cFabricante = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+ 
+        V1 = "adi"
+        PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
+    'Debug.print PosicaoBase
+    If PosicaoBase > 0 Then
+        Var1 = "nAdicao"
+        nAdicao = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        
+        Var1 = "nSeqAdic"
+        nSeqAdic = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+        
+        Var1 = "cFabricante"
+        cFabricante = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    End If
 End If
 
 '=======================================================================================
@@ -1748,6 +1913,7 @@ TBAbrir!dbl_ValorTotal = Format(vUnCom * TBAbrir!int_Qtd, "###,##0.00")
 '=======================================================================================
 'Icms
 '=======================================================================================
+TBAbrir!txt_CST = IIf(vICMSCST <> "", Replace(vICMSCST, ".", ","), 0)
 TBAbrir!int_ICMS = IIf(ICMSpICMS <> "", Replace(ICMSpICMS, ".", ","), "0")
 TBAbrir!ICMS_SN = IIf(ICMSpICMS <> "", Replace(ICMSpICMS, ".", ","), "0")
 '=======================================================================================
@@ -1755,7 +1921,6 @@ TBAbrir!ICMS_SN = IIf(ICMSpICMS <> "", Replace(ICMSpICMS, ".", ","), "0")
 '=======================================================================================
 TBAbrir!int_IPI = IIf(IPIpIPI <> "", Replace(IPIpIPI, ".", ","), "0")
 TBAbrir!dbl_valoripi = IIf(IPIvIPI <> "", Replace(IPIvIPI, ".", ","), 0)
-TBAbrir!txt_CST = IIf(vICMSCST <> "", Replace(vICMSCST, ".", ","), 0)
 TBAbrir!CST_IPI = IIf(CSTIPI <> "", Replace(CSTIPI, ".", ","), 0)
 '=======================================================================================
 'PIS
@@ -1810,7 +1975,7 @@ TBAliquota.AddNew
 End If
 
 TBAliquota!Id_Item = TBAbrir!Int_codigo
-TBAliquota!Origem_mercadoria = orig
+TBAliquota!Origem_mercadoria = IIf(orig = "", 0, orig)
 TBAliquota!Tributacao_ICMS = IIf(CSTICMS <> "", Replace(CSTICMS, ".", ","), 0)
 TBAliquota!Valor_BC = IIf(ICMSvBC <> "", Replace(ICMSvBC, ".", ","), 0)
 TBAliquota!Valor_ICMS = IIf(ICMSvICMS <> "", Replace(ICMSvICMS, ".", ","), 0)
@@ -1836,7 +2001,7 @@ End If
 
 TBAliquota!Id_Item = TBAbrir!Int_codigo
 TBAliquota!Codigo_situacaoTributaria = IIf(CSTIPI <> "", CSTIPI, "0")
-TBAliquota!Valor_BC = vBCIPI
+TBAliquota!Valor_BC = IIf(vBCIPI <> "", Replace(vBCIPI, ".", ","), 0)
 TBAliquota.Update
 TBAliquota.Close
 '================================================================
@@ -1849,7 +2014,7 @@ TBAliquota.AddNew
 End If
 TBAliquota!Id_Item = TBAbrir!Int_codigo
 TBAliquota!Codigo_situacaoTributaria = CSTPIS 'Lista.ListItems.Item(Contador).ListSubItems(16).Text
-TBAliquota!Valor_BC = vbcPIS 'Format(IIf(Lista.ListItems.Item(Contador).ListSubItems(20).Text <> "", Lista.ListItems.Item(Contador).ListSubItems(20).Text, "0,00"), "###,##0.00")
+TBAliquota!Valor_BC = IIf(vbcPIS <> "", Replace(vbcPIS, ".", ","), 0) 'Format(IIf(Lista.ListItems.Item(Contador).ListSubItems(20).Text <> "", Lista.ListItems.Item(Contador).ListSubItems(20).Text, "0,00"), "###,##0.00")
 TBAliquota.Update
 TBAliquota.Close
 '================================================================
@@ -1863,7 +2028,7 @@ End If
 
 TBAliquota!Id_Item = TBAbrir!Int_codigo
 TBAliquota!Codigo_situacaoTributaria = CSTCOFINS 'Lista.ListItems.Item(Contador).ListSubItems(7).Text
-TBAliquota!Valor_BC = vBCCofins 'Format(IIf(Lista.ListItems.Item(Contador).ListSubItems(23).Text <> "", Lista.ListItems.Item(Contador).ListSubItems(23).Text, "0,00"), "###,##0.00")
+TBAliquota!Valor_BC = IIf(vBCCofins <> "", Replace(vBCCofins, ".", ","), 0) 'Format(IIf(Lista.ListItems.Item(Contador).ListSubItems(23).Text <> "", Lista.ListItems.Item(Contador).ListSubItems(23).Text, "0,00"), "###,##0.00")
 TBAliquota.Update
 'TBAliquota.Close
 'TBAbrir.Close
@@ -1961,25 +2126,6 @@ tratar_erro:
     USMsgBox ("Descrição do erro : " + Error()), vbCritical, "CAPRIND v5.0"
 End Sub
 
-''Public Sub ProcAbrirXML()
-''On Error GoTo tratar_erro
-''    CommonDialog1.Filter = "Arquivo XML (*.xml)|*.xml"
-''    CommonDialog1.ShowOpen
-''
-''    strCaminho = CommonDialog1.filename
-''    If strCaminho = "" Then Exit Sub
-''If USMsgBox("Deseja realmente importar o XML " & strCaminho & "", vbYesNo, "CAPRIND v5.0") = vbYes Then
-''    FunImportarXML (strCaminho)
-''    PosicaoBase = 1
-''Else
-''  USMsgBox "Importação cancelada com sucesso!", vbInformation, "CAPRIND v5.0"
-''End If
-''
-''Exit Sub
-''tratar_erro:
-''    MsgBox ("Descrição do erro : " + Error()), vbCritical
-''    Exit Sub
-''End Sub
 
 Public Sub ProcImportarXMLTransporte()
 On Error GoTo tratar_erro
@@ -1987,24 +2133,37 @@ On Error GoTo tratar_erro
 '==============================================================
 ' Carrega dados transporte
 '==============================================================
+
+    PosicaoBase = 0
+    lngPosicaoInicial = 0
+    lngPosicaoFinal = 0
+    V1 = "transp"
+    PosicaoBase = InStr(IIf(lngPosicaoFinal > 0, lngPosicaoFinal, 1), strarquivo, V1, 1)
     
-    Var1 = "CNPJ"
-    transpCNPJ = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-    transpCNPJ = Format(transpCNPJ, "@@.@@@.@@@/@@@@-@@")
-    Var1 = "xNome"
-    transpxNome = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-  
-    Var1 = "IE"
-    transpIE = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
-  
-    Var1 = "xEnder"
-    transpxEnder = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
- 
-    Var1 = "xMun"
-    transpxMun = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+   ' modFrete
     
-    Var1 = "UF"
-    transpUF = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    Var1 = "modFrete"
+    modFrete = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+    If modFrete <> "0" Then
+       Var1 = "CNPJ"
+       transpCNPJ = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+       transpCNPJ = Format(transpCNPJ, "@@.@@@.@@@/@@@@-@@")
+       Var1 = "xNome"
+       transpxNome = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+     
+       Var1 = "IE"
+       transpIE = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+     
+       Var1 = "xEnder"
+       transpxEnder = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    
+       Var1 = "xMun"
+       transpxMun = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+       
+       Var1 = "UF"
+       transpUF = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    End If
 
     Var1 = "qVol"
     transpqVol = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
@@ -2014,6 +2173,7 @@ On Error GoTo tratar_erro
     Var1 = "esp"
     transpesp = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
 
+    If modFrete <> "0" Then
     Var1 = "marca"
     transpMarca = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
     
@@ -2029,14 +2189,16 @@ On Error GoTo tratar_erro
     transppesoB = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
     transppesoB = Replace(transppesoB, ".", ",")
     transppesoB = Format(transppesoB, "###,##0.00")
+    End If
     
     
-     Set TBTransporte = CreateObject("adodb.recordset")
-   TBTransporte.Open "Select * from tbl_Dados_Transp where ID_Nota = " & ID_nota, Conexao, adOpenKeyset, adLockOptimistic
-   If TBTransporte.EOF = True Then
+    Set TBTransporte = CreateObject("adodb.recordset")
+    TBTransporte.Open "Select * from tbl_Dados_Transp where ID_Nota = " & ID_nota, Conexao, adOpenKeyset, adLockOptimistic
+    If TBTransporte.EOF = True Then
     TBTransporte.AddNew
     End If
     
+    TBTransporte!txt_Frete_Conta = modFrete
     TBTransporte!ID_nota = ID_nota
     TBTransporte!txt_Razao = transpxNome
     TBTransporte!txt_CNPJ = transpCNPJ
@@ -2080,8 +2242,14 @@ On Error GoTo tratar_erro
 '====================================================================================================
 'Carregar dados adicionais
 '====================================================================================================
+    Var1 = "infAdFisco"
+    infAdFisco = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    Debug.Print infAdFisco
+    
     Var1 = "infCpl"
     infCpl = ProcImportarXMLCarregacampo("<" & Var1 & ">", "</" & Var1 & ">", Len("<" & Var1 & ">"))
+    Debug.Print strarquivo
+    
 '====================================================================================================
 'Carregar numero do protocolo de recebimento do SEFAZ
 '====================================================================================================
@@ -2097,6 +2265,7 @@ On Error GoTo tratar_erro
    End If
    
    TBGravar_NFe!ID_nota = ID_nota
+   TBGravar_NFe!mem_corpo = infAdFisco
    TBGravar_NFe!mem_DadosAdicionais = infCpl
    TBGravar_NFe.Update
    TBGravar_NFe.Close
@@ -2139,7 +2308,7 @@ If ImportarXML = True Then
     
     If ID_nota <> 0 And ID_empresa <> 0 And TPNota = "T" Then
         If LocalArmazenamento = "" Then
-            frmEstoque_Local.Show 1
+                frmEstoque_Local.Show 1
         End If
         EntrarEstoqueNF
     End If
@@ -2294,3 +2463,32 @@ tratar_erro:
     Exit Sub
 End Sub
 
+
+Private Function ReadUTF8File(sFile) As String
+   Const ForReading = 1
+   Dim sPrefix
+ 
+   With CreateObject("Scripting.FileSystemObject")
+     sPrefix = .OpenTextFile(sFile, ForReading, False, False).Read(3)
+   End With
+   If Left(sPrefix, 3) <> Chr(&HEF) & Chr(&HBB) & Chr(&HBF) Then
+     With CreateObject("Scripting.FileSystemObject")
+       pvReadFile = .OpenTextFile(sFile, ForReading, False, Left(sPrefix, 2) = Chr(&HFF) & Chr(&HFE)).ReadAll()
+       ReadUTF8File = pvReadFile
+     End With
+   Else
+     With CreateObject("ADODB.Stream")
+       .Open
+       If Left(sPrefix, 2) = Chr(&HFF) & Chr(&HFE) Then
+         .Charset = "Unicode"
+       ElseIf Left(sPrefix, 3) = Chr(&HEF) & Chr(&HBB) & Chr(&HBF) Then
+         .Charset = "UTF-8"
+       Else
+         .Charset = "_autodetect"
+       End If
+       .LoadFromFile sFile
+       pvReadFile = .ReadText
+       ReadUTF8File = pvReadFile
+     End With
+   End If
+End Function

@@ -3,7 +3,7 @@ Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "tabctl32.ocx"
 Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.ocx"
 Object = "{935C9182-411B-4FFB-9512-97C8745743BC}#2.5#0"; "AResize.ocx"
 Object = "{4F446E73-0578-46E4-81BC-6A88ADF59FEA}#2.3#0"; "DrawSuite2022.ocx"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.ocx"
 Begin VB.Form frmEstoque_Recebimento_consignacao 
    BackColor       =   &H00E0E0E0&
    Caption         =   "Estoque - Recebimento - Consignação"
@@ -562,7 +562,7 @@ Begin VB.Form frmEstoque_Recebimento_consignacao
                CalendarTitleBackColor=   8421504
                CalendarTitleForeColor=   16777215
                CalendarTrailingForeColor=   255
-               Format          =   127860737
+               Format          =   144900097
                CurrentDate     =   39057
             End
          End
@@ -1160,7 +1160,7 @@ Begin VB.Form frmEstoque_Recebimento_consignacao
             CalendarTitleBackColor=   8421504
             CalendarTitleForeColor=   16777215
             CalendarTrailingForeColor=   255
-            Format          =   196149249
+            Format          =   144506881
             CurrentDate     =   39057
          End
          Begin VB.Label Label23 
@@ -2007,7 +2007,7 @@ On Error GoTo tratar_erro
 
 txtid_estoque.Text = 0
 txtId_produto_lista = 0
-txtcodproduto.Text = ""
+txtcodProduto.Text = ""
 Cmb_cod_ref.Clear
 txtdesc.Text = ""
 txtdesctecnica.Text = ""
@@ -2018,7 +2018,7 @@ txtCertificado.Text = ""
 txtpeso.Text = ""
 txtfamilia.Text = ""
 txtObs.Text = ""
-txtUN.Text = ""
+txtUn.Text = ""
 txtVlr_unit = ""
 txtVlr_total = "0,00"
 CodigoLista = 0
@@ -2070,10 +2070,10 @@ On Error GoTo tratar_erro
 
 Lista.ListItems.Clear
 If cmbfiltrarpor = "Família" Then
-    cmbfamilia.Visible = True
+    cmbFamilia.Visible = True
     txtTexto.Visible = False
 Else
-    cmbfamilia.Visible = False
+    cmbFamilia.Visible = False
     txtTexto.Visible = True
     If cmbfiltrarpor = "Nota fiscal" And txtTexto <> "" Then
         VerifNumero = txtTexto
@@ -2191,11 +2191,11 @@ End Sub
 Sub ProcPuxaDadosProduto()
 On Error GoTo tratar_erro
 
-txtcodproduto.Text = TBProduto!Codproduto
+txtcodProduto.Text = TBProduto!Codproduto
 txtdesenho.Text = TBProduto!Desenho
 txtdesc.Text = TBProduto!Descricao
 txtfamilia.Text = TBProduto!Classe
-txtUN.Text = TBProduto!Unidade
+txtUn.Text = TBProduto!Unidade
 txtdesctecnica.Text = TBProduto!descricaotecnica
 txtpeso.Text = IIf(IsNull(TBProduto!peso_metro), "", Format(TBProduto!peso_metro, "###,##0.0000"))
 txtVlr_unit = IIf(IsNull(TBProduto!PCusto), "", Format(TBProduto!PCusto, "###,##0.0000000000"))
@@ -2277,7 +2277,7 @@ If TBGravar.EOF = True Then
         Else
             Bairro = IIf(IsNull(TBClientes!Bairro), "", TBClientes!Bairro)
         End If
-        TBGravar!txt_Bairro = Bairro
+        TBGravar!Txt_bairro = Bairro
         
         If Txt_tipodest = "C" Then
             TBGravar!txt_tipocliente = IIf(IsNull(TBClientes!Tipo), "", TBClientes!Tipo)
@@ -2421,9 +2421,9 @@ Validada:
     With frmFaturamento_Prod_Serv
         .Novo_Nota = False
         .Faturamento_Vendas_PI = False
-        .txtId.Text = ID_nota
+        .txtid.Text = ID_nota
         .txtNFiscal.Text = txtnotafiscal
-        .ProcCarregaDadosNota .txtId.Text
+        .ProcCarregaDadosNota .txtid.Text
         .ProcCarregaLista
         .ProcCarregaListaServicos
         .ProcGravarTotaisNota
@@ -2435,11 +2435,11 @@ Validada:
         .txtSerie.TabStop = True
         
         CamposFiltro = "NF.ID, NF.dt_DataEmissao, NF.dt_Saida_Entrada, NF.int_NotaFiscal, NF.TipoNF, NF.Serie, TN.dbl_Valor_Total_Nota, NF.txt_Razao_Nome, NF.Int_status, NF.Imprimir, NF.ID_empresa, NF.Aplicacao, NF.DtValidacaoOF, NF.DtValidacao"
-        .Strsql_Faturamento = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtId
-        .Strsql_FaturamentoTotal = "Select Sum(TN.dbl_Valor_Total_Nota) as Valor1, Sum(TN.Valor_Total_Receber_Pagar) as Valor2 from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtId & " and NF.Int_status = 1"
-        .Strsql_FaturamentoTotalCanc = "Select Sum(TN.dbl_Valor_Total_Nota) as Valor3 from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtId & " and NF.Int_status = 2"
-        .Strsql_FaturamentoNFe = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.TipoNF <> 'SA' AND  NF.ID = " & .txtId
-        .Strsql_FaturamentoNFSe = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.TipoNF = 'SA' AND NF.ID = " & .txtId
+        .Strsql_Faturamento = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtid
+        .Strsql_FaturamentoTotal = "Select Sum(TN.dbl_Valor_Total_Nota) as Valor1, Sum(TN.Valor_Total_Receber_Pagar) as Valor2 from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtid & " and NF.Int_status = 1"
+        .Strsql_FaturamentoTotalCanc = "Select Sum(TN.dbl_Valor_Total_Nota) as Valor3 from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.ID = " & .txtid & " and NF.Int_status = 2"
+        .Strsql_FaturamentoNFe = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.TipoNF <> 'SA' AND  NF.ID = " & .txtid
+        .Strsql_FaturamentoNFSe = "Select " & CamposFiltro & " from tbl_Dados_Nota_Fiscal NF INNER JOIN tbl_Totais_Nota TN ON NF.ID = TN.ID_Nota where NF.TipoNF = 'SA' AND NF.ID = " & .txtid
         .ProcCarregaListaNota (1)
         
         If USMsgBox("Deseja prosseguir com o preenchimento dos dados da nota fiscal?", vbYesNo, "CAPRIND v5.0") = vbNo Then Unload frmFaturamento_Prod_Serv
@@ -2457,9 +2457,9 @@ On Error GoTo tratar_erro
 CamposFiltro = "NF, Serie, emissaonf, ID_cliente, Cliente"
 INNERJOINTEXTO = "Select " & CamposFiltro & " from Estoque_controle where "
 TextoFiltroPadrao = "Consignacao = 'True' and ID_empresa = " & Cmb_empresa.ItemData(Cmb_empresa.ListIndex) & " and Cliente is not null and NF is not null and Status = 'CONSIGNAÇÃO RECEBIDA' group by " & CamposFiltro & " order by Cliente, NF"
-If txtTexto <> "" Or cmbfamilia <> "" Then
+If txtTexto <> "" Or cmbFamilia <> "" Then
     If cmbfiltrarpor = "Família" Then
-        StrSql_Localizar_Consignacao = INNERJOINTEXTO & "classe = '" & cmbfamilia & "' and " & TextoFiltroPadrao
+        StrSql_Localizar_Consignacao = INNERJOINTEXTO & "classe = '" & cmbFamilia & "' and " & TextoFiltroPadrao
     Else
         Select Case cmbfiltrarpor
             Case "Nota fiscal":
@@ -2492,6 +2492,8 @@ On Error GoTo tratar_erro
 Lista.ListItems.Clear
 Set TBLISTA = CreateObject("adodb.recordset")
 TBLISTA.Open StrSql_Localizar_Consignacao, Conexao, adOpenKeyset, adLockReadOnly
+Debug.Print StrSql_Localizar_Consignacao
+
 If TBLISTA.EOF = False Then
     PBLista.Min = 0
     PBLista.Max = TBLISTA.RecordCount
@@ -2555,10 +2557,10 @@ Direitos
 ProcLimpaVariaveisPrincipais
 SSTab1.Tab = 0
 cmbfiltrarpor = "Nota fiscal"
-ProcCarregaComboFamilia cmbfamilia, "familia <> 'Null'", False
+ProcCarregaComboFamilia cmbFamilia, "familia <> 'Null'", False
 ProcCarregaComboEmpresa Cmb_empresa, False
 ProcCarregaComboEmpresa Cmb_empresa1, False
-txtData = Date
+txtdata = Date
 
 ProcRemoveObjetosResize Me
 
@@ -2771,12 +2773,12 @@ TBEstoque!Desenho = txtdesenho.Text
 TBEstoque!Documento = txtnotafiscal.Text
 TBEstoque!LOTE = txtnotafiscal.Text
 TBEstoque!Descricao = txtdesc.Text
-TBEstoque!DtEmissao = txtData
+TBEstoque!DtEmissao = txtdata
 TBEstoque!Entrada = Format(txtQtde.Text, "###.##0.000")
 TBEstoque!Entrada_PC = IIf(Txt_qtde_PC = "", Null, Format(Txt_qtde_PC, "###.##0.000"))
 TBEstoque!Responsavel = pubUsuario
 TBEstoque!Cliente = txtCliente.Text
-TBEstoque!Data = txtData
+TBEstoque!Data = txtdata
 TBEstoque!VlrUnit = Format(txtVlr_unit, "###.##0.00000")
 TBEstoque!vlrTotal = Format(txtVlr_total, "###.##0.00")
 TBEstoque!Obs = IIf(txtObs.Text = "", Null, txtObs)
@@ -2885,12 +2887,12 @@ If TBLISTA.EOF = False Then
     txtCertificado.Text = IIf(IsNull(TBLISTA!Certificado), "", TBLISTA!Certificado)
     txtfamilia.Text = IIf(IsNull(TBLISTA!Classe), "", TBLISTA!Classe)
     txtObs.Text = Lista_Movimentacao.SelectedItem.ListSubItems(10)
-    txtUN.Text = IIf(IsNull(TBLISTA!Un), "", TBLISTA!Un)
-    txtData.Value = IIf(IsNull(TBLISTA!Data), Date, Format(TBLISTA!Data, "dd/mm/yyyy"))
+    txtUn.Text = IIf(IsNull(TBLISTA!Un), "", TBLISTA!Un)
+    txtdata.Value = IIf(IsNull(TBLISTA!Data), Date, Format(TBLISTA!Data, "dd/mm/yyyy"))
     txtVlr_unit.Text = IIf(IsNull(TBLISTA!valor_unitario), "", Format(TBLISTA!valor_unitario, "###,##0.0000000000"))
     txtVlr_total.Text = IIf(IsNull(TBLISTA!Valor_total), "0,00", Format(TBLISTA!Valor_total, "###,##0.00"))
     Proccarregalocarm
-    If (IsNull(TBLISTA!local_armaz)) = False And TBLISTA!local_armaz <> "" Then cmbLocal_armaz = TBLISTA!local_armaz
+ '   If (IsNull(TBLISTA!local_armaz)) = False And TBLISTA!local_armaz <> "" Then cmbLocal_armaz = TBLISTA!local_armaz
 End If
 TBLISTA.Close
 Frame1.Enabled = True
@@ -3051,7 +3053,7 @@ TBGravar!Desenho = txtdesenho.Text
 TBGravar!Descricao = txtdesc.Text
 TBGravar!peso_unit = txtpeso.Text
 TBGravar!descricaotecnica = txtdesctecnica.Text
-TBGravar!Data = txtData
+TBGravar!Data = txtdata
 TBGravar!estoque_real = Format(txtQtde.Text, "###.##0.000")
 TBGravar!estoque_real_PC = IIf(Txt_qtde_PC = "", Null, Format(Txt_qtde_PC, "###.##0.000"))
 TBGravar!estoque_venda = Format(txtQtde.Text, "###.##0.000")
@@ -3059,7 +3061,7 @@ TBGravar!Qtde = Format(txtQtde.Text, "###.##0.000")
 TBGravar!Corrida = txtcorrida.Text
 TBGravar!Certificado = txtCertificado.Text
 TBGravar!Classe = txtfamilia.Text
-TBGravar!Un = txtUN.Text
+TBGravar!Un = txtUn.Text
 TBGravar!NF = txtnotafiscal.Text
 TBGravar!Serie = Txt_serie
 TBGravar!ID_Cliente = txtid_cliente.Text

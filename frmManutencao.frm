@@ -5,7 +5,7 @@ Object = "{BDC217C8-ED16-11CD-956C-0000C04E4C0A}#1.1#0"; "tabctl32.ocx"
 Object = "{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCT2.ocx"
 Object = "{935C9182-411B-4FFB-9512-97C8745743BC}#2.5#0"; "AResize.ocx"
 Object = "{4F446E73-0578-46E4-81BC-6A88ADF59FEA}#2.3#0"; "DrawSuite2022.ocx"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.ocx"
 Begin VB.Form frmManutencao 
    BackColor       =   &H00E0E0E0&
    Caption         =   "Manutenção - Equipamentos"
@@ -363,7 +363,7 @@ Begin VB.Form frmManutencao
          CalendarTitleBackColor=   8421504
          CalendarTitleForeColor=   16777215
          CalendarTrailingForeColor=   255
-         Format          =   197328897
+         Format          =   915013633
          CurrentDate     =   39057
       End
       Begin MSMask.MaskEdBox Txt_data_conclusao1 
@@ -416,7 +416,7 @@ Begin VB.Form frmManutencao
          CalendarTitleBackColor=   8421504
          CalendarTitleForeColor=   16777215
          CalendarTrailingForeColor=   255
-         Format          =   197328898
+         Format          =   915079170
          CurrentDate     =   40504.5572337963
       End
       Begin MSMask.MaskEdBox Txt_Hora_conclusao1 
@@ -469,7 +469,7 @@ Begin VB.Form frmManutencao
          CalendarTitleBackColor=   8421504
          CalendarTitleForeColor=   16777215
          CalendarTrailingForeColor=   255
-         Format          =   197328897
+         Format          =   915079169
          CurrentDate     =   39057
       End
       Begin VB.Label Label36 
@@ -4259,7 +4259,7 @@ If Alterar = False Then
 End If
 If Lista_check.ListItems.Count = 0 Then Exit Sub
 
-If USMsgBox("Deseja realmente salvar esta(s) marcação(ões) do check-list?", vbYesNo, "CAPRIND v5.0") = vbYes Then
+If USMsgBox("Deseja realmente salvar esta(s) marcação(ões) do check-list?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then
     InitFor = 0
     With Lista_check
         PBLista.Max = .ListItems.Count
@@ -4301,7 +4301,7 @@ If USMsgBox("Deseja realmente salvar esta(s) marcação(ões) do check-list?", vbYe
 '                TBFIltro.Find ("ID = " & txtIDData)
 '                TBFIltro.MoveNext
 '                If TBFIltro.EOF = True Then
-                    If USMsgBox("Deseja criar uma nova manutenção para o dia " & Format(Cmb_data_proxima, "dd/mm/yy") & "?", vbYesNo, "CAPRIND v5.0") = vbYes Then
+                    If USMsgBox("Deseja criar uma nova manutenção para o dia " & Format(Cmb_data_proxima, "dd/mm/yy") & "?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then
                         ProcCopiaDadosData False, txtIDData, txtId, True
                         USMsgBox ("Nova data cadastrada com sucesso."), vbInformation, "CAPRIND v5.0"
                         '==================================
@@ -4368,7 +4368,7 @@ With Lista
     For InitFor = 1 To .ListItems.Count
         If .ListItems.Item(InitFor).Checked = True Then
             If Permitido = False Then
-                If USMsgBox("Deseja realmente excluir esta(s) manutenção(ões)?", vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
+                If USMsgBox("Deseja realmente excluir esta(s) manutenção(ões)?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
             End If
 1:
             Permitido = True
@@ -4443,7 +4443,7 @@ With Lista_Data
     For InitFor = 1 To .ListItems.Count
         If .ListItems.Item(InitFor).Checked = True Then
             If Permitido = False Then
-                If USMsgBox("Deseja realmente excluir esta(s) data(s)?", vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
+                If USMsgBox("Deseja realmente excluir esta(s) data(s)?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
             End If
 1:
             Permitido = True
@@ -4495,7 +4495,7 @@ With Lista_desenho
     For InitFor = 1 To .ListItems.Count
         If .ListItems.Item(InitFor).Checked = True Then
             If Permitido = False Then
-                If USMsgBox("Deseja realmente excluir este(s) produto(s) para substituição?", vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
+                If USMsgBox("Deseja realmente excluir este(s) produto(s) para substituição?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
             End If
 1:
             Permitido = True
@@ -4546,7 +4546,7 @@ With Lista_check
     For InitFor = 1 To .ListItems.Count
         If .ListItems.Item(InitFor).Checked = True Then
             If Permitido = False Then
-                If USMsgBox("Deseja realmente excluir esta(s) descrição(ões) do check-list?", vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
+                If USMsgBox("Deseja realmente excluir esta(s) descrição(ões) do check-list?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then GoTo 1 Else Exit Sub
             End If
 1:
             Permitido = True
@@ -5039,7 +5039,7 @@ If txttipo = "Preventiva" Then
         Set TBFIltro = CreateObject("adodb.recordset")
         TBFIltro.Open "Select * from Manutencao_data where idManutencao = " & txtId & " and CAST(FLOOR(CAST(Data1 as float)) AS datetime) = '" & Format(Cmb_data_proxima, "Short Date") & "'", Conexao, adOpenKeyset, adLockOptimistic
         If TBFIltro.EOF = True Then
-            If USMsgBox("Deseja criar uma nova manutenção para o dia " & Format(Cmb_data_proxima, "dd/mm/yy") & "?", vbYesNo, "CAPRIND v5.0") = vbYes Then
+            If USMsgBox("Deseja criar uma nova manutenção para o dia " & Format(Cmb_data_proxima, "dd/mm/yy") & "?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbYes Then
                 ProcCopiaDadosData False, txtIDData, txtId, True
                 USMsgBox ("Nova data cadastrada com sucesso."), vbInformation, "CAPRIND v5.0"
                 '==================================
@@ -7117,7 +7117,7 @@ If Novo_manutencao3 = True Then
     End If
 End If
 If Novo_manutencao4 = True Then
-    If USMsgBox("A descrição ainda não foi salva, deseja salvar antes de fechar o módulo?", vbYesNo, "CAPRIND v5.0") = vbYes Then
+    If USMsgBox("A descrição ainda não foi salva, deseja salvar antes de fechar o módulo?", vbYesNo + vbQuestion, "CAPRIND v5.0") = vbYes Then
         SSTab1.Tab = 1
         SSTab2.Tab = 2
         procSalvar3
@@ -7327,7 +7327,7 @@ If Incluir = False Then
     USMsgBox ("Atenção usuário " & pubUsuario & " você não tem acesso a este recurso."), vbExclamation, "CAPRIND v5.0"
     Exit Sub
 End If
-If USMsgBox("Deseja realmente copiar esta data da manutenção?", vbYesNo, "CAPRIND v5.0") = vbNo Then Exit Sub
+If USMsgBox("Deseja realmente copiar esta data da manutenção?", vbQuestion + vbYesNo, "CAPRIND v5.0") = vbNo Then Exit Sub
 If Novo_manutencao2 = True Then
     USMsgBox ("Salve o registro antes de copiar."), vbExclamation, "CAPRIND v5.0"
     Exit Sub
